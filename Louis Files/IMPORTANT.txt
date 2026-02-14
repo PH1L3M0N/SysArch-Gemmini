@@ -1,0 +1,51 @@
+There might be a problem first time running it because of CRLF, convert the error files to LF.
+
+I realized I didn't simulate 8x8 SAs, 64x64 PEs. Instead, I did 8x8 SAs, 8x8 PEs. 
+For this reason, I tried to compile the config files with the correct parameters, but keep hitting Java heap limit.
+But, my laptop only has 16 GB RAM so I can't allocate more than 12 GB for JAVA.
+I believe this is a different problem from Philemon's.
+
+HacKing Gemmini (Interesting parameters):
+    •	"memory-access" and "execute" instructions happen concurrently, in different regions of the hardware.
+    •	Systolic array dimensions (tileRows, tileColumns, meshRows, meshColumns): The systolic array is composed of a 2-level hierarchy, in which each tile is fully combinational, while a mesh of tiles has pipeline registers between each tile.
+    •	Dataflow parameters (dataflow): Determine whether the systolic array in Gemmini is output-stationary or weight-stationary, or whether it supports both dataflows so that programmers may choose between them at runtime.
+    •	Scratchpad and accumulator memory parameters (sp_banks, sp_capacity, acc_capacity): Determine the properties of the Gemmini scratchpad memory: overall capacity of the scratchpad or accumulators (in KiB), and the number of banks the scratchpad is divided into.
+
+Where to change parameters:
+    •	chipyard/generators/gemmini/src/main/scala/gemmini/CustomConfigs.scala
+    •	GemminiCustomConfigs in CustomConfigs.scala takes defaultConfig from Configs.scala: chipyard/generators/gemmini/src/main/scala/gemmini/Configs.scala
+    •	The examples in CustomConfigs.scala show how to change parameters.
+
+Changes made:
+    •	CustomGemminiSoCConfig.scala:
+        •	Path (from chipyard): chipyard/generators/chipyard/src/main/scala/config/CustomGemminiSoCConfig.scala
+    •	Makefile:
+        •	Path (from chipyard): chipyard/generators/gemmini/software/gemmini-rocc-tests/bareMetalC/Makefile
+    •	my_test.c:
+        •	Path (from chipyard): chipyard/generators/gemmini/software/gemmini-rocc-tests/bareMetalC/my_test.c
+    •	CustomConfigs.scala:
+        •	Path (from chipyard): chipyard/generators/gemmini/src/main/scala/gemmini/CustomConfigs.scala
+    •	PixelRepeater.scala:
+        •	Path (from chipyard): chipyard/generators/gemmini/src/main/scala/gemmini/PixelRepeater.scala
+
+After Changing parameters (Do this first):
+1)	cd ~/SsysArch/gemmini/chipyard
+2)	source env.sh
+3)	export JAVA_TOOL_OPTIONS="-Xms2g -Xmx16g -XX:+UseG1GC" 
+        -> -Xms2g: Initial Java heap size = 2 GB.
+        -> -Xmx16g lets Java to use 16 Gig RAM (Maximum Java heap size = 16 GB). If 16 GB is not enough for compiling, increase.
+        -> -XX:+UseG1GC -> Use the G1 garbage collector.
+4)	cd ~/SsysArch/gemmini/chipyard/sims/verilator
+5)	make clean
+6)	make CONFIG=NoDebugCustomGemminiSoCConfig -j1
+
+Run simulation:
+1) cd ~/SsysArch/gemmini/chipyard/generators/gemmini/software/gemmini-rocc-tests
+2) ./build.sh
+3) cd ~/SsysArch/gemmini/chipyard/sims/verilator
+5) ulimit -s unlimited
+4) ./simulator-chipyard.harness-NoDebugCustomGemminiSoCConfig \
+ ../../generators/gemmini/software/gemmini-rocc-tests/build/bareMetalC/my_test-baremetal \
+  +max_core_cycles=2000000000
+
+NOTE: NoDebugCustomGemminiSoCConfig is a new file I made (requires changing parameters in other files as well)
