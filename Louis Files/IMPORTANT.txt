@@ -29,23 +29,25 @@ Changes made:
         •	Path (from chipyard): chipyard/generators/gemmini/src/main/scala/gemmini/PixelRepeater.scala
 
 After Changing parameters (Do this first):
-1)	cd ~/SsysArch/gemmini/chipyard
+1)	cd /ssd/sneha/Gemmini/chipyard
+1)   (b). source ~/miniconda3/bin/activate
 2)	source env.sh
 3)	export JAVA_TOOL_OPTIONS="-Xms2g -Xmx16g -XX:+UseG1GC" 
         -> -Xms2g: Initial Java heap size = 2 GB.
         -> -Xmx16g lets Java to use 16 Gig RAM (Maximum Java heap size = 16 GB). If 16 GB is not enough for compiling, increase.
         -> -XX:+UseG1GC -> Use the G1 garbage collector.
-4)	cd ~/SsysArch/gemmini/chipyard/sims/verilator
+4)	cd /ssd/sneha/Gemmini/chipyard/sims/verilator
 5)	make clean
 6)	make CONFIG=NoDebugCustomGemminiSoCConfig -j1
 
 Run simulation:
-1) cd ~/SsysArch/gemmini/chipyard/generators/gemmini/software/gemmini-rocc-tests
+1) cd /ssd/sneha/Gemmini/chipyard/generators/gemmini/software/gemmini-rocc-tests
 2) ./build.sh
-3) cd ~/SsysArch/gemmini/chipyard/sims/verilator
+3) cd /ssd/sneha/Gemmini/chipyard/sims/verilator
 5) ulimit -s unlimited
 4) ./simulator-chipyard.harness-NoDebugCustomGemminiSoCConfig \
  ../../generators/gemmini/software/gemmini-rocc-tests/build/bareMetalC/my_test-baremetal \
   +max_core_cycles=2000000000
+
 
 NOTE: NoDebugCustomGemminiSoCConfig is a new file I made (requires changing parameters in other files as well)
